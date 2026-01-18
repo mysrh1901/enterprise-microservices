@@ -1,0 +1,4 @@
+com/enterprise/gamma/controller/InventoryControllerTest.class
+com/enterprise/gamma/service/InventoryServiceTest.class
+com/enterprise/gamma/GammaServiceApplicationTests.class
+com/enterprise/gamma/controller/InventoryControllerIntegrationTest.class
