@@ -14,21 +14,14 @@ dependencies {
     // Spring Boot Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-    // Spring Data JPA
+    // Spring Data JPA (keeping for entities/repositories)
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-    // PostgreSQL
-    runtimeOnly "org.postgresql:postgresql:${postgresqlVersion}"
-
-    // H2 Database for testing/local development
+    // H2 Database for in-memory (no external DB needed)
     runtimeOnly 'com.h2database:h2'
-
-    // Flyway
-    implementation "org.flywaydb:flyway-core:${flywayVersion}"
-    implementation "org.flywaydb:flyway-database-postgresql:${flywayVersion}"
 
     // Lombok
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
