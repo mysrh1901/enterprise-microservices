@@ -1,0 +1,120 @@
+# ---------- Namespaces ----------
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: qa
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod
+---
+# ---------- Alpha Deployment ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alpha-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alpha-service
+  template:
+    metadata:
+      labels:
+        app: alpha-service
+    spec:
+      containers:
+      - name: alpha-service
+        image: mydockerhubuser/alpha-service:latest
+        ports:
+        - containerPort: 8080
+---
+# ---------- Alpha Service ----------
+apiVersion: v1
+kind: Service
+metadata:
+  name: alpha-service
+spec:
+  type: NodePort
+  selector:
+    app: alpha-service
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30001
+---
+# ---------- Beta Deployment ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beta-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: beta-service
+  template:
+    metadata:
+      labels:
+        app: beta-service
+    spec:
+      containers:
+      - name: beta-service
+        image: mydockerhubuser/beta-service:latest
+        ports:
+        - containerPort: 8080
+---
+# ---------- Beta Service ----------
+apiVersion: v1
+kind: Service
+metadata:
+  name: beta-service
+spec:
+  type: NodePort
+  selector:
+    app: beta-service
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30002
+---
+# ---------- Gamma Deployment ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gamma-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gamma-service
+  template:
+    metadata:
+      labels:
+        app: gamma-service
+    spec:
+      containers:
+      - name: gamma-service
+        image: mydockerhubuser/gamma-service:latest
+        ports:
+        - containerPort: 8080
+---
+# ---------- Gamma Service ----------
+apiVersion: v1
+kind: Service
+metadata:
+  name: gamma-service
+spec:
+  type: NodePort
+  selector:
+    app: gamma-service
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30003
