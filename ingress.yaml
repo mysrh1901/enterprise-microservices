@@ -4,9 +4,7 @@ kind: Ingress
 
 metadata:
   name: microservices-ingress
-
   namespace: dev # change to your environment
-
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 
