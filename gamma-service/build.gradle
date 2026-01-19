@@ -23,6 +23,9 @@ dependencies {
     // PostgreSQL
     runtimeOnly "org.postgresql:postgresql:${postgresqlVersion}"
 
+    // H2 Database for testing/local development
+    runtimeOnly 'com.h2database:h2'
+
     // Flyway
     implementation "org.flywaydb:flyway-core:${flywayVersion}"
     implementation "org.flywaydb:flyway-database-postgresql:${flywayVersion}"
