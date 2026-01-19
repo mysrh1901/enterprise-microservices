@@ -1,0 +1,6 @@
+rootProject.name = 'enterprise-microservices'
+
+include 'common-lib'
+include 'alpha-service'
+include 'beta-service'
+include 'gamma-service'

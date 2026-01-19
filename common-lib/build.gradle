@@ -1,0 +1,35 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+
+// Don't create bootJar for library module
+bootJar {
+    enabled = false
+}
+
+// Create regular jar instead
+jar {
+    enabled = true
+}
+
+dependencies {
+    // Spring Boot Starter (minimal dependencies)
+    implementation 'org.springframework.boot:spring-boot-starter'
+
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Lombok
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Jackson for JSON
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Test Dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+    testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}

@@ -1,19 +1,25 @@
 # Multi-stage Dockerfile for Beta Service
 # Supports both V1 and V2 deployments via API_VERSION env variable
 # Stage 1: Build
-FROM maven:3.9-eclipse-temurin-17 AS builder
+FROM gradle:8.5-jdk17 AS builder
 
 WORKDIR /build
 
-# Copy parent pom and common-lib first (for better layer caching)
-COPY pom.xml .
+# Copy Gradle wrapper and build files first (for better layer caching)
+COPY gradle gradle/
+COPY gradlew .
+COPY gradlew.bat .
+COPY build.gradle .
+COPY settings.gradle .
+
+# Copy common-lib first
 COPY common-lib common-lib/
 
 # Copy beta-service
 COPY beta-service beta-service/
 
 # Build the application (skip tests for faster builds)
-RUN mvn clean package -pl beta-service -am -DskipTests
+RUN gradle :beta-service:bootJar --no-daemon -x test
 
 # Stage 2: Runtime
 FROM eclipse-temurin:17-jre-alpine
@@ -30,7 +36,7 @@ RUN addgroup -g 1001 appgroup && \
 WORKDIR /app
 
 # Copy the built JAR from builder stage
-COPY --from=builder /build/beta-service/target/beta-service.jar app.jar
+COPY --from=builder /build/beta-service/build/libs/beta-service.jar app.jar
 
 # Change ownership to non-root user
 RUN chown -R appuser:appgroup /app
