@@ -5,12 +5,13 @@ pipeline {
         booleanParam(name: 'DEPLOY_ALPHA', defaultValue: true, description: 'Deploy Alpha Service')
         booleanParam(name: 'DEPLOY_BETA', defaultValue: true, description: 'Deploy Beta Service')
         booleanParam(name: 'DEPLOY_GAMMA', defaultValue: true, description: 'Deploy Gamma Service')
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Target environment')
     }
 
     environment {
         DOCKER_REGISTRY = 'enterprise'
         IMAGE_TAG = "${env.BUILD_NUMBER}"
-        KUBE_NAMESPACE = 'dev'
+        KUBE_NAMESPACE = "${params.ENVIRONMENT}"
         KUBECONFIG_CREDENTIAL_ID = 'kubeconfig'
         JAVA_HOME = 'C:\\Program Files\\Microsoft\\jdk-17.0.17.10-hotspot'
         PATH = "${env.JAVA_HOME}\\bin;${env.PATH}"
