@@ -1,0 +1,253 @@
+pipeline {
+    agent any
+
+    parameters {
+        booleanParam(name: 'DEPLOY_ALPHA', defaultValue: true, description: 'Deploy Alpha Service')
+        booleanParam(name: 'DEPLOY_BETA', defaultValue: true, description: 'Deploy Beta Service')
+        booleanParam(name: 'DEPLOY_GAMMA', defaultValue: true, description: 'Deploy Gamma Service')
+    }
+
+    environment {
+        DOCKER_REGISTRY = 'enterprise'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        KUBE_NAMESPACE = 'dev'
+        KUBECONFIG_CREDENTIAL_ID = 'kubeconfig'
+    }
+
+    tools {
+        jdk 'JDK17'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    echo "Building commit: ${env.GIT_COMMIT}"
+                    echo "Branch: ${env.GIT_BRANCH}"
+                }
+            }
+        }
+
+        stage('Build Common Library') {
+            when {
+                anyOf {
+                    expression { params.DEPLOY_ALPHA }
+                    expression { params.DEPLOY_BETA }
+                    expression { params.DEPLOY_GAMMA }
+                }
+            }
+            steps {
+                bat './gradlew :common-lib:build'
+            }
+        }
+
+        stage('Build Services') {
+            parallel {
+                stage('Alpha Service') {
+                    when {
+                        expression { params.DEPLOY_ALPHA }
+                    }
+                    stages {
+                        stage('Build Alpha') {
+                            steps {
+                                bat './gradlew :alpha-service:clean :alpha-service:build'
+                            }
+                        }
+                        stage('Test Alpha') {
+                            steps {
+                                bat './gradlew :alpha-service:test'
+                            }
+                            post {
+                                always {
+                                    junit allowEmptyResults: true, testResults: 'alpha-service/build/test-results/test/*.xml'
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage('Beta Service') {
+                    when {
+                        expression { params.DEPLOY_BETA }
+                    }
+                    stages {
+                        stage('Build Beta') {
+                            steps {
+                                bat './gradlew :beta-service:clean :beta-service:build'
+                            }
+                        }
+                        stage('Test Beta') {
+                            steps {
+                                bat './gradlew :beta-service:test'
+                            }
+                            post {
+                                always {
+                                    junit allowEmptyResults: true, testResults: 'beta-service/build/test-results/test/*.xml'
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage('Gamma Service') {
+                    when {
+                        expression { params.DEPLOY_GAMMA }
+                    }
+                    stages {
+                        stage('Build Gamma') {
+                            steps {
+                                bat './gradlew :gamma-service:clean :gamma-service:build'
+                            }
+                        }
+                        stage('Test Gamma') {
+                            steps {
+                                bat './gradlew :gamma-service:test'
+                            }
+                            post {
+                                always {
+                                    junit allowEmptyResults: true, testResults: 'gamma-service/build/test-results/test/*.xml'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Images') {
+            parallel {
+                stage('Alpha Image') {
+                    when {
+                        expression { params.DEPLOY_ALPHA }
+                    }
+                    steps {
+                        script {
+                            docker.build("${DOCKER_REGISTRY}/alpha-service:${IMAGE_TAG}", "-f alpha-service/Dockerfile .")
+                            docker.build("${DOCKER_REGISTRY}/alpha-service:latest", "-f alpha-service/Dockerfile .")
+                        }
+                    }
+                }
+
+                stage('Beta Image') {
+                    when {
+                        expression { params.DEPLOY_BETA }
+                    }
+                    steps {
+                        script {
+                            docker.build("${DOCKER_REGISTRY}/beta-service:${IMAGE_TAG}", "-f beta-service/Dockerfile .")
+                            docker.build("${DOCKER_REGISTRY}/beta-service:latest", "-f beta-service/Dockerfile .")
+                        }
+                    }
+                }
+
+                stage('Gamma Image') {
+                    when {
+                        expression { params.DEPLOY_GAMMA }
+                    }
+                    steps {
+                        script {
+                            docker.build("${DOCKER_REGISTRY}/gamma-service:${IMAGE_TAG}", "-f gamma-service/Dockerfile .")
+                            docker.build("${DOCKER_REGISTRY}/gamma-service:latest", "-f gamma-service/Dockerfile .")
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Local Kubernetes') {
+            steps {
+                script {
+                    withKubeConfig([credentialsId: "${KUBECONFIG_CREDENTIAL_ID}"]) {
+                        // Create namespace if it doesn't exist
+                        bat """
+                            kubectl get namespace ${KUBE_NAMESPACE} || kubectl create namespace ${KUBE_NAMESPACE}
+                        """
+
+                        // Deploy services
+                        if (params.DEPLOY_ALPHA) {
+                            echo "Deploying Alpha Service..."
+                            bat """
+                                kubectl apply -f K8s/k8s-setup-local.yaml
+                                kubectl set image deployment/alpha-service alpha-service=${DOCKER_REGISTRY}/alpha-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
+                                kubectl rollout status deployment/alpha-service -n ${KUBE_NAMESPACE} --timeout=300s
+                            """
+                        }
+
+                        if (params.DEPLOY_BETA) {
+                            echo "Deploying Beta Service..."
+                            bat """
+                                kubectl apply -f K8s/k8s-setup-local.yaml
+                                kubectl set image deployment/beta-service beta-service=${DOCKER_REGISTRY}/beta-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
+                                kubectl rollout status deployment/beta-service -n ${KUBE_NAMESPACE} --timeout=300s
+                            """
+                        }
+
+                        if (params.DEPLOY_GAMMA) {
+                            echo "Deploying Gamma Service..."
+                            bat """
+                                kubectl apply -f K8s/k8s-setup-local.yaml
+                                kubectl set image deployment/gamma-service gamma-service=${DOCKER_REGISTRY}/gamma-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
+                                kubectl rollout status deployment/gamma-service -n ${KUBE_NAMESPACE} --timeout=300s
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    withKubeConfig([credentialsId: "${KUBECONFIG_CREDENTIAL_ID}"]) {
+                        bat """
+                            echo "=== Deployments Status ==="
+                            kubectl get deployments -n ${KUBE_NAMESPACE}
+                            echo ""
+                            echo "=== Pods Status ==="
+                            kubectl get pods -n ${KUBE_NAMESPACE}
+                            echo ""
+                            echo "=== Services ==="
+                            kubectl get services -n ${KUBE_NAMESPACE}
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            script {
+                def deployedServices = []
+                if (params.DEPLOY_ALPHA) deployedServices.add('Alpha (http://localhost:30001)')
+                if (params.DEPLOY_BETA) deployedServices.add('Beta (http://localhost:30002)')
+                if (params.DEPLOY_GAMMA) deployedServices.add('Gamma (http://localhost:30003)')
+
+                echo """
+                Pipeline completed successfully!
+
+                Summary:
+                - Namespace: ${KUBE_NAMESPACE}
+                - Image Tag: ${IMAGE_TAG}
+                - Services Deployed: ${deployedServices.join(', ')}
+
+                Access your services at:
+                ${deployedServices.join('\n')}
+                """
+            }
+        }
+        failure {
+            script {
+                echo """
+                Pipeline failed!
+
+                Please check the logs for details.
+                """
+            }
+        }
+        always {
+            cleanWs()
+        }
+    }
+}
