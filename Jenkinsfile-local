@@ -121,9 +121,11 @@ pipeline {
                         expression { params.DEPLOY_ALPHA }
                     }
                     steps {
-                        script {
-                            docker.build("${DOCKER_REGISTRY}/alpha-service:${IMAGE_TAG}", "-f alpha-service/Dockerfile .")
-                            docker.build("${DOCKER_REGISTRY}/alpha-service:latest", "-f alpha-service/Dockerfile .")
+                        retry(3) {
+                            script {
+                                docker.build("${DOCKER_REGISTRY}/alpha-service:${IMAGE_TAG}", "-f alpha-service/Dockerfile .")
+                                docker.build("${DOCKER_REGISTRY}/alpha-service:latest", "-f alpha-service/Dockerfile .")
+                            }
                         }
                     }
                 }
@@ -133,9 +135,11 @@ pipeline {
                         expression { params.DEPLOY_BETA }
                     }
                     steps {
-                        script {
-                            docker.build("${DOCKER_REGISTRY}/beta-service:${IMAGE_TAG}", "-f beta-service/Dockerfile .")
-                            docker.build("${DOCKER_REGISTRY}/beta-service:latest", "-f beta-service/Dockerfile .")
+                        retry(3) {
+                            script {
+                                docker.build("${DOCKER_REGISTRY}/beta-service:${IMAGE_TAG}", "-f beta-service/Dockerfile .")
+                                docker.build("${DOCKER_REGISTRY}/beta-service:latest", "-f beta-service/Dockerfile .")
+                            }
                         }
                     }
                 }
@@ -145,9 +149,11 @@ pipeline {
                         expression { params.DEPLOY_GAMMA }
                     }
                     steps {
-                        script {
-                            docker.build("${DOCKER_REGISTRY}/gamma-service:${IMAGE_TAG}", "-f gamma-service/Dockerfile .")
-                            docker.build("${DOCKER_REGISTRY}/gamma-service:latest", "-f gamma-service/Dockerfile .")
+                        retry(3) {
+                            script {
+                                docker.build("${DOCKER_REGISTRY}/gamma-service:${IMAGE_TAG}", "-f gamma-service/Dockerfile .")
+                                docker.build("${DOCKER_REGISTRY}/gamma-service:latest", "-f gamma-service/Dockerfile .")
+                            }
                         }
                     }
                 }
