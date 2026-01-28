@@ -12,10 +12,8 @@ pipeline {
         IMAGE_TAG = "${env.BUILD_NUMBER}"
         KUBE_NAMESPACE = 'dev'
         KUBECONFIG_CREDENTIAL_ID = 'kubeconfig'
-    }
-
-    tools {
-        jdk 'JDK17'
+        JAVA_HOME = 'C:\\Program Files\\Microsoft\\jdk-17.0.17.10-hotspot'
+        PATH = "${env.JAVA_HOME}\\bin;${env.PATH}"
     }
 
     stages {
