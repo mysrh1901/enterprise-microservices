@@ -173,13 +173,11 @@ pipeline {
                         if (params.DEPLOY_ALPHA) {
                             echo "Deploying Alpha Service to ${KUBE_NAMESPACE}..."
                             bat """
-                                kubectl get deployment alpha-service -n ${KUBE_NAMESPACE} > nul 2>&1 || ^
-                                kubectl create deployment alpha-service --image=${DOCKER_REGISTRY}/alpha-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
+                                kubectl get deployment alpha-service -n ${KUBE_NAMESPACE} >nul 2>&1 || kubectl create deployment alpha-service --image=${DOCKER_REGISTRY}/alpha-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
 
                                 kubectl set image deployment/alpha-service alpha-service=${DOCKER_REGISTRY}/alpha-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
 
-                                kubectl get service alpha-service -n ${KUBE_NAMESPACE} > nul 2>&1 || ^
-                                kubectl expose deployment alpha-service --type=NodePort --port=80 --target-port=8080 -n ${KUBE_NAMESPACE}
+                                kubectl get service alpha-service -n ${KUBE_NAMESPACE} >nul 2>&1 || kubectl expose deployment alpha-service --type=NodePort --port=80 --target-port=8080 -n ${KUBE_NAMESPACE}
 
                                 kubectl patch service alpha-service -n ${KUBE_NAMESPACE} --type=json -p="[{\\"op\\": \\"replace\\", \\"path\\": \\"/spec/ports/0/nodePort\\", \\"value\\": 30001}]" || echo "NodePort already set"
 
@@ -191,13 +189,11 @@ pipeline {
                         if (params.DEPLOY_BETA) {
                             echo "Deploying Beta Service to ${KUBE_NAMESPACE}..."
                             bat """
-                                kubectl get deployment beta-service -n ${KUBE_NAMESPACE} > nul 2>&1 || ^
-                                kubectl create deployment beta-service --image=${DOCKER_REGISTRY}/beta-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
+                                kubectl get deployment beta-service -n ${KUBE_NAMESPACE} >nul 2>&1 || kubectl create deployment beta-service --image=${DOCKER_REGISTRY}/beta-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
 
                                 kubectl set image deployment/beta-service beta-service=${DOCKER_REGISTRY}/beta-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
 
-                                kubectl get service beta-service -n ${KUBE_NAMESPACE} > nul 2>&1 || ^
-                                kubectl expose deployment beta-service --type=NodePort --port=80 --target-port=8080 -n ${KUBE_NAMESPACE}
+                                kubectl get service beta-service -n ${KUBE_NAMESPACE} >nul 2>&1 || kubectl expose deployment beta-service --type=NodePort --port=80 --target-port=8080 -n ${KUBE_NAMESPACE}
 
                                 kubectl patch service beta-service -n ${KUBE_NAMESPACE} --type=json -p="[{\\"op\\": \\"replace\\", \\"path\\": \\"/spec/ports/0/nodePort\\", \\"value\\": 30002}]" || echo "NodePort already set"
 
@@ -209,13 +205,11 @@ pipeline {
                         if (params.DEPLOY_GAMMA) {
                             echo "Deploying Gamma Service to ${KUBE_NAMESPACE}..."
                             bat """
-                                kubectl get deployment gamma-service -n ${KUBE_NAMESPACE} > nul 2>&1 || ^
-                                kubectl create deployment gamma-service --image=${DOCKER_REGISTRY}/gamma-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
+                                kubectl get deployment gamma-service -n ${KUBE_NAMESPACE} >nul 2>&1 || kubectl create deployment gamma-service --image=${DOCKER_REGISTRY}/gamma-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
 
                                 kubectl set image deployment/gamma-service gamma-service=${DOCKER_REGISTRY}/gamma-service:${IMAGE_TAG} -n ${KUBE_NAMESPACE}
 
-                                kubectl get service gamma-service -n ${KUBE_NAMESPACE} > nul 2>&1 || ^
-                                kubectl expose deployment gamma-service --type=NodePort --port=80 --target-port=8080 -n ${KUBE_NAMESPACE}
+                                kubectl get service gamma-service -n ${KUBE_NAMESPACE} >nul 2>&1 || kubectl expose deployment gamma-service --type=NodePort --port=80 --target-port=8080 -n ${KUBE_NAMESPACE}
 
                                 kubectl patch service gamma-service -n ${KUBE_NAMESPACE} --type=json -p="[{\\"op\\": \\"replace\\", \\"path\\": \\"/spec/ports/0/nodePort\\", \\"value\\": 30003}]" || echo "NodePort already set"
 
