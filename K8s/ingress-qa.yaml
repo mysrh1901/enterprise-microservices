@@ -2,15 +2,17 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: microservices-ingress
-  namespace: dev # change to your environment (dev, staging, prod)
+  namespace: qa
   annotations:
     # Rewrite the path to remove the prefix (e.g., /alpha/actuator/health -> /actuator/health)
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
+    # No SSL redirect for QA
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   ingressClassName: nginx
   rules:
-    - host: localhost # Use 'localhost' for dev, your domain for prod
+    - host: qa.microservices.local
       http:
         paths:
           # Alpha Service routes

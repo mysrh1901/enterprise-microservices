@@ -2,15 +2,22 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: microservices-ingress
-  namespace: dev # change to your environment (dev, staging, prod)
+  namespace: prod
   annotations:
-    # Rewrite the path to remove the prefix (e.g., /alpha/actuator/health -> /actuator/health)
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
+    # Enable SSL redirect in production
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Add rate limiting for production
+    nginx.ingress.kubernetes.io/limit-rps: "100"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.yourcompany.com
+      secretName: microservices-tls-secret
   rules:
-    - host: localhost # Use 'localhost' for dev, your domain for prod
+    - host: api.yourcompany.com
       http:
         paths:
           # Alpha Service routes
