@@ -31,9 +31,26 @@ spec:
     spec:
       containers:
       - name: alpha-service
-        image: mydockerhubuser/alpha-service:latest
+        image: enterprise/alpha-service:17
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
 ---
 # ---------- Alpha Service ----------
 apiVersion: v1
@@ -66,9 +83,26 @@ spec:
     spec:
       containers:
       - name: beta-service
-        image: mydockerhubuser/beta-service:latest
+        image: enterprise/beta-service:17
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
 ---
 # ---------- Beta Service ----------
 apiVersion: v1
@@ -101,9 +135,26 @@ spec:
     spec:
       containers:
       - name: gamma-service
-        image: mydockerhubuser/gamma-service:latest
+        image: enterprise/gamma-service:17
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
 ---
 # ---------- Gamma Service ----------
 apiVersion: v1
